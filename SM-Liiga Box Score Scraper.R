@@ -89,8 +89,8 @@ get_box_score <- function(.row_num, .data) {
     html_text() %>%
     as_tibble() %>%
     set_names("score") %>%
-    mutate(home_score = str_split(score, "", simplify = TRUE)[,1]) %>%
-    mutate(away_score = str_split(score, "", simplify = TRUE)[,2]) %>%
+    mutate(home_score = str_split(score, "–", simplify = TRUE)[,1]) %>%
+    mutate(away_score = str_split(score, "–", simplify = TRUE)[,2]) %>%
     mutate_all(~ str_trim(., side = "both")) %>%
     mutate_all(as.character) %>%
     select(home_score, away_score)
