@@ -49,7 +49,17 @@ get_box_score <- function(.row_num, .data) {
     mutate(game_strength = str_extract_all(jumbled_data, game_states)) %>%
     mutate(game_strength = str_replace_all(game_strength, "[[:punct:]]|^c", "")) %>%
     mutate(game_strength = if_else(game_strength == "haracter0", "", game_strength)) %>%
-    mutate(game_strength = str_replace_all(game_strength, c("VL" = "SO", "YV" = "5v4", "VM" = "", "TM" = "EN", "RL" = "PS", "IM" = "EA", "AV" = "4v5", "VT" = "", "TV" = "4v4", "YV2" = "5v3", "SR" = "DP"))) %>%
+    mutate(game_strength = str_replace_all(game_strength, c("VL" = "SO", 
+                                                            "YV" = "5v4", 
+                                                            "VM" = "", 
+                                                            "TM" = "EN", 
+                                                            "RL" = "PS", 
+                                                            "IM" = "EA", 
+                                                            "AV" = "4v5", 
+                                                            "VT" = "", 
+                                                            "TV" = "4v4", 
+                                                            "YV2" = "5v3", 
+                                                            "SR" = "DP"))) %>%
     mutate(game_strength = if_else(game_strength == "", "5v5", game_strength)) %>%
     mutate(goal = str_split(jumbled_data, "\\(", simplify = TRUE, n = 2)[,1]) %>%
     mutate(goal = str_replace_all(goal, c("[[:digit:]]" = "", "\\#" = ""))) %>%
