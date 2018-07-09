@@ -1,8 +1,7 @@
-
 library(tidyverse)
 library(rvest)
 
-# Gets Schedule Data
+# Gets links for scoring summary info for each game of each season
 get_schedule <- function(season) {
   
   url <- str_c("http://liiga.fi/ottelut/", season, "/runkosarja/")
@@ -17,13 +16,12 @@ get_schedule <- function(season) {
     mutate(season = season)
   
   return(schedule)
-  
 }
 
-# Gets for all seasons
+# Gets all the links into a data frame for all the seasons of interest
 schedule <- map_df(c("2014-2015", "2015-2016", "2016-2017", "2017-2018"), get_schedule)
 
-# Gets Box Score Data
+# Gets scoring summary box score info for specific game
 get_box_score <- function(.row_num, .data) {
 
   progress_bar$tick()$print()
@@ -51,6 +49,8 @@ get_box_score <- function(.row_num, .data) {
     mutate(game_strength = str_extract_all(jumbled_data, game_states)) %>%
     mutate(game_strength = str_replace_all(game_strength, "[[:punct:]]|^c", "")) %>%
     mutate(game_strength = if_else(game_strength == "haracter0", "", game_strength)) %>%
+    mutate(game_strength = str_replace_all(game_strength, c("VL" = "SO", "YV" = "5v4", "VM" = "", "TM" = "EN", "RL" = "PS", "IM" = "EA", "AV" = "4v5", "VT" = "", "TV" = "4v4", "YV2" = "5v3", "SR" = "DP"))) %>%
+    mutate(game_strength = if_else(game_strength == "", "5v5", game_strength)) %>%
     mutate(goal = str_split(jumbled_data, "\\(", simplify = TRUE, n = 2)[,1]) %>%
     mutate(goal = str_replace_all(goal, c("[[:digit:]]" = "", "\\#" = ""))) %>%
     mutate(goal = str_replace_all(goal, game_states, "")) %>%
@@ -99,7 +99,7 @@ get_box_score <- function(.row_num, .data) {
   return(box_score_data)  
 }
 
-# Attempts and moves on if doesn't work
+# Attempts the above function and moves on (and notifies user) if there's an error
 try_get_box_score <- function(.row_num, .data) {
   
   tryCatch(get_box_score(.row_num, .data), 
@@ -121,5 +121,5 @@ progress_bar <- schedule %>%
   tally() %>%
   progress_estimated(min_time = 0)
 
-# Gets Box Score for All Seasons
+# Gets scoring summary box score info for each game of every season of interest
 sm_liiga_box_score_data <- 1:nrow(schedule) %>% map_df(try_get_box_score, .data = schedule)
